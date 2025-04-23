@@ -1,6 +1,4 @@
 
-// Updated to fetch raw VTT from edge function and parse it on frontend
-
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = 'https://bhsvgjyawlepaqhgpguf.supabase.co';
@@ -13,33 +11,31 @@ export interface Caption {
   text: string;
 }
 
-// Simpler extractor (as in server)
 export function extractYouTubeVideoId(url: string): string | null {
   const m = url.match(/^.*(?:youtu.be\/|v\/|\/u\/\w\/|embed\/|watch\?v=)([^#&?]*).*/);
   const id = m && m[1].length === 11 ? m[1] : null;
   return id;
 }
 
-// Fetch captions just gets the VTT string
 export async function fetchYouTubeCaptions(videoId: string): Promise<Caption[]> {
   try {
     console.log(`Fetching captions VTT for video ID: ${videoId}`);
     const { data, error } = await supabase.functions.invoke(
-  'youtube-captions',
-  {
-    body: { videoId },
-    responseType: 'text',    // ← add this
-  }
-);
+      'youtube-captions',
+      {
+        body: { videoId },
+        responseType: 'text',    // Explicitly request text response
+      }
+    );
 
     if (error) {
       console.error('Error fetching captions VTT:', error);
       return [];
     }
 
-    // If error message returned as text, handle it
+    // Ensure data is a string before parsing
     if (typeof data !== "string") {
-      console.warn('Response is not string VTT data');
+      console.warn('Response is not a string VTT data');
       return [];
     }
 
@@ -57,10 +53,12 @@ export function parseVTT(vttContent: string): Caption[] {
   const vttLines = vttContent.split('\n');
   const captions: Caption[] = [];
   let index = 0;
+  
   // Skip WebVTT header
   while (index < vttLines.length && !vttLines[index].includes('-->')) {
     index++;
   }
+  
   while (index < vttLines.length) {
     const line = vttLines[index];
     if (line.includes('-->')) {
@@ -73,14 +71,17 @@ export function parseVTT(vttContent: string): Caption[] {
         const endMinutes = parseInt(timeMatch[4]);
         const endSeconds = parseInt(timeMatch[5]);
         const endMillis = parseInt(timeMatch[6]);
+        
         const start = startMinutes * 60 + startSeconds + startMillis / 1000;
         const end = endMinutes * 60 + endSeconds + endMillis / 1000;
+        
         let text = '';
         index++;
         while (index < vttLines.length && vttLines[index].trim() !== '') {
           text += (text ? ' ' : '') + vttLines[index].trim();
           index++;
         }
+        
         if (text) {
           captions.push({ start, end, text });
         }
@@ -88,5 +89,6 @@ export function parseVTT(vttContent: string): Caption[] {
     }
     index++;
   }
+  
   return captions;
 }
