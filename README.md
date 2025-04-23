@@ -1,73 +1,65 @@
-# Welcome to your Lovable project
 
-## Project info
+# YouTube Caption Viewer
 
-**URL**: https://lovable.dev/projects/9a66029e-faf8-4f27-9975-325c78a5259f
+A web application that displays YouTube videos along with their captions. The captions are synchronized with the video playback and highlighted as the video plays.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- Extract and display captions from YouTube videos
+- Embedded YouTube player
+- Synchronized caption highlighting
+- Playback controls
+- Mobile-responsive design
 
-**Use Lovable**
+## Setup Instructions
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/9a66029e-faf8-4f27-9975-325c78a5259f) and start prompting.
+### 1. Setup Supabase for Caption Fetching
 
-Changes made via Lovable will be committed automatically to this repo.
+This application uses a Supabase Edge Function to fetch YouTube captions. To set it up:
 
-**Use your preferred IDE**
+1. Install Supabase CLI if you haven't already:
+   ```bash
+   npm install -g supabase
+   ```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+2. Link your Supabase project:
+   ```bash
+   supabase login
+   supabase link --project-ref xjvrqnfffokjfcdmshuk
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+3. Deploy the edge function:
+   ```bash
+   supabase functions deploy youtube-captions --no-verify-jwt
+   ```
 
-Follow these steps:
+### 2. Run the Application
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+3. Open your browser and navigate to: `http://localhost:8080`
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## How to Use
 
-**Edit a file directly in GitHub**
+1. Enter a YouTube video URL in the input field
+2. Click "Load Video & Captions"
+3. The video will load and captions will be displayed below it
+4. Captions will be highlighted as the video plays
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Technical Details
 
-**Use GitHub Codespaces**
+- Built with React, TypeScript, and Tailwind CSS
+- Uses Supabase Edge Functions to handle CORS and fetch YouTube captions
+- Captions are extracted and parsed from the YouTube video page
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Note on Captions Availability
 
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/9a66029e-faf8-4f27-9975-325c78a5259f) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Not all YouTube videos have captions available. If a video doesn't have captions, the application will display a message indicating that no captions are available for the video.
