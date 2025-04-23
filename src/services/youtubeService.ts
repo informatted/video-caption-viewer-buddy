@@ -24,9 +24,13 @@ export function extractYouTubeVideoId(url: string): string | null {
 export async function fetchYouTubeCaptions(videoId: string): Promise<Caption[]> {
   try {
     console.log(`Fetching captions VTT for video ID: ${videoId}`);
-    const { data, error } = await supabase.functions.invoke('youtube-captions', {
-      body: { videoId },
-    });
+    const { data, error } = await supabase.functions.invoke(
+  'youtube-captions',
+  {
+    body: { videoId },
+    responseType: 'text',    // ← add this
+  }
+);
 
     if (error) {
       console.error('Error fetching captions VTT:', error);
