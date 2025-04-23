@@ -18,6 +18,8 @@ export function YoutubePlayer({ videoId, onReady, onPlay, onPause, onStateChange
       autoplay: 0,
       modestbranding: 1,
       rel: 0,
+      cc_load_policy: 1, // Force closed captions to be available
+      cc_lang_pref: 'en', // Prefer English captions
     },
   };
 
@@ -35,13 +37,21 @@ export function YoutubePlayer({ videoId, onReady, onPlay, onPause, onStateChange
     }
   };
 
+  const handleError = (event: any) => {
+    console.error("YouTube Player Error:", event.data);
+  };
+
   return (
     <div className="relative w-full rounded-lg overflow-hidden shadow-lg">
       <YouTube
         videoId={videoId}
         opts={opts}
-        onReady={(e) => onReady(e.target)}
+        onReady={(e) => {
+          console.log("YouTube player ready");
+          onReady(e.target);
+        }}
         onStateChange={handleStateChange}
+        onError={handleError}
         className="w-full"
       />
     </div>

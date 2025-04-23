@@ -16,12 +16,20 @@ export interface Caption {
  * Extracts the video ID from a YouTube URL
  */
 export function extractYouTubeVideoId(url: string): string | null {
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-  const match = url.match(regExp);
+  // Handle various YouTube URL formats
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/user\/\S+\/\S+\/|youtube\.com\/user\/\S+\/|youtube\.com\/\S+\/\S+\/|youtube\.com\/[^\/]+\?.*v=|youtube\.com\/\S+\/\S+\/\S+\/|youtube\.com\/shorts\/|youtube\.com\/live\/|youtube\.com\/watch\?.*[&?]v=)([^"&?\/\s]{11})/i,
+    /^([^"&?\/\s]{11})$/i
+  ];
 
-  return (match && match[2].length === 11)
-    ? match[2]
-    : null;
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -29,6 +37,7 @@ export function extractYouTubeVideoId(url: string): string | null {
  */
 export async function fetchYouTubeCaptions(videoId: string): Promise<Caption[]> {
   try {
+    console.log(`Fetching captions for video ID: ${videoId}`);
     const { data, error } = await supabase.functions.invoke('youtube-captions', {
       body: { videoId }
     });
@@ -39,10 +48,14 @@ export async function fetchYouTubeCaptions(videoId: string): Promise<Caption[]> 
     }
 
     if (data.error || !data.captions || data.captions.length === 0) {
-      console.warn('No captions available:', data.error);
+      console.warn('No captions available:', data.error || 'Unknown reason');
+      if (data.details) {
+        console.warn('Details:', data.details);
+      }
       return [];
     }
 
+    console.log(`Successfully fetched ${data.captions.length} captions`);
     return data.captions;
   } catch (error) {
     console.error('Error fetching captions:', error);
